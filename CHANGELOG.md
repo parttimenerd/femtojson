@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [0.2.1] - 2026-02-25
+
+### Added
+- CompactPrinter to print without unnecessary newlines
+
 ## [0.2.0] - 2026-02-25
 
 ### Changed
