@@ -6,74 +6,74 @@ import java.util.Map;
 
 public class PrettyPrinter {
 
-    public static void prettyPrint(Object obj) {
-        prettyPrint("", obj);
+    public static String prettyPrint(Object obj) {
+        return prettyPrint("", obj);
     }
 
-    private static void prettyPrint(String indent, Object obj) {
+    private static String prettyPrint(String indent, Object obj) {
         if (obj == null) {
-            System.out.print("null");
+            return "null";
         } else if (obj instanceof Boolean) {
-            System.out.print(obj);
+            return obj.toString();
         } else if (obj instanceof Integer) {
-            System.out.print(obj);
+            return obj.toString();
         } else if (obj instanceof Double) {
-            System.out.print(obj);
+            return obj.toString();
         } else if (obj instanceof String) {
-            System.out.print("\"" + escapeString((String) obj) + "\"");
+            return "\"" + escapeString((String) obj) + "\"";
         } else if (obj instanceof Map) {
-            prettyPrintMap(indent, (Map<String, Object>) obj);
+            return prettyPrintMap(indent, (Map<String, Object>) obj);
         } else if (obj instanceof ArrayList) {
-            prettyPrintArray(indent, (List<Object>) obj);
+            return prettyPrintArray(indent, (List<Object>) obj);
         } else {
-            System.out.print(obj);
+            return obj.toString();
         }
     }
 
-    private static void prettyPrintMap(String indent, Map<String, Object> map) {
+    private static String prettyPrintMap(String indent, Map<String, Object> map) {
         if (map.isEmpty()) {
-            System.out.print("{}");
-            return;
+            return "{}";
         }
 
-        System.out.println("{");
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
         String nextIndent = indent + "  ";
         boolean first = true;
 
         for (String key : map.keySet()) {
             if (!first) {
-                System.out.println(",");
+                sb.append(",\n");
             }
-            System.out.print(nextIndent + "\"" + escapeString(key) + "\": ");
-            prettyPrint(nextIndent, map.get(key));
+            sb.append(nextIndent).append("\"").append(escapeString(key)).append("\": ");
+            sb.append(prettyPrint(nextIndent, map.get(key)));
             first = false;
         }
 
-        System.out.println();
-        System.out.print(indent + "}");
+        sb.append("\n").append(indent).append("}");
+        return sb.toString();
     }
 
-    private static void prettyPrintArray(String indent, List<Object> array) {
+    private static String prettyPrintArray(String indent, List<Object> array) {
         if (array.isEmpty()) {
-            System.out.print("[]");
-            return;
+            return "[]";
         }
 
-        System.out.println("[");
+        StringBuilder sb = new StringBuilder();
+        sb.append("[\n");
         String nextIndent = indent + "  ";
         boolean first = true;
 
         for (Object element : array) {
             if (!first) {
-                System.out.println(",");
+                sb.append(",\n");
             }
-            System.out.print(nextIndent);
-            prettyPrint(nextIndent, element);
+            sb.append(nextIndent);
+            sb.append(prettyPrint(nextIndent, element));
             first = false;
         }
 
-        System.out.println();
-        System.out.print(indent + "]");
+        sb.append("\n").append(indent).append("]");
+        return sb.toString();
     }
 
     private static String escapeString(String str) {

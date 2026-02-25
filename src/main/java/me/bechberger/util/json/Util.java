@@ -3,6 +3,9 @@ package me.bechberger.util.json;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility methods for working with JSON-like structures (maps and lists).
+ */
 public class Util {
 
     private Util() {

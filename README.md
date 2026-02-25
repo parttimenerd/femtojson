@@ -72,8 +72,9 @@ public class PrettyPrintExample {
         String json = "{\"users\": [{\"name\": \"Alice\", \"age\": 30}, {\"name\": \"Bob\", \"age\": 25}]}";
         Object parsed = JSONParser.parse(json);
         
-        // Pretty print with indentation
-        PrettyPrinter.prettyPrint(parsed);
+        // Pretty print with indentation (returns formatted string)
+        String formatted = PrettyPrinter.prettyPrint(parsed);
+        System.out.println(formatted);
     }
 }
 ```
@@ -84,11 +85,11 @@ Output:
   "users": [
     {
       "name": "Alice",
-      "age": 30
+      "age": 30.0
     },
     {
       "name": "Bob",
-      "age": 25
+      "age": 25.0
     }
   ]
 }

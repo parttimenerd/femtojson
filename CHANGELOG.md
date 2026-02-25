@@ -7,12 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
 ### Changed
-### Deprecated
-### Removed
-### Fixed
-### Security
+- PrettyPrinter now returns the string and doesn't print it directly
 
 ## [0.1.0] - 2026-02-24
 

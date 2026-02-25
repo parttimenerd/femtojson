@@ -195,7 +195,7 @@ public class PrettyPrinterTest {
     @ParameterizedTest(name = "[{index}]")
     @MethodSource("prettyPrintCases")
     public void testPrettyPrint(Object obj, String expected) {
-        String actual = prettyPrintToString(obj);
+        String actual = PrettyPrinter.prettyPrint(obj);
         assertEquals(expected, actual, "Pretty printed output should match expected format");
     }
 
@@ -205,7 +205,7 @@ public class PrettyPrinterTest {
     @ParameterizedTest(name = "[{index}]")
     @MethodSource("prettyPrintCases")
     public void testPrettyPrintIsValidJSON(Object obj, String expected) throws IOException {
-        String prettyPrinted = prettyPrintToString(obj);
+        String prettyPrinted = PrettyPrinter.prettyPrint(obj);
 
         // Should not throw an exception when parsing
         JSONParser parser = new JSONParser(prettyPrinted);
@@ -214,115 +214,6 @@ public class PrettyPrinterTest {
         assertEquals(obj, parsed, "Pretty printed JSON should parse back to the same object");
     }
 
-    /**
-     * Helper method to pretty print an object to a string
-     */
-    private static String prettyPrintToString(Object obj) {
-        return prettyPrintToString("", obj);
-    }
-
-    private static String prettyPrintToString(String indent, Object obj) {
-        if (obj == null) {
-            return "null";
-        } else if (obj instanceof Boolean) {
-            return obj.toString();
-        } else if (obj instanceof Integer) {
-            return obj.toString();
-        } else if (obj instanceof Double) {
-            return obj.toString();
-        } else if (obj instanceof String) {
-            return "\"" + escapeString((String) obj) + "\"";
-        } else if (obj instanceof Map) {
-            return prettyPrintMapToString(indent, (Map<String, Object>) obj);
-        } else if (obj instanceof List) {
-            return prettyPrintArrayToString(indent, (List<Object>) obj);
-        } else {
-            return obj.toString();
-        }
-    }
-
-    private static String prettyPrintMapToString(String indent, Map<String, Object> map) {
-        if (map.isEmpty()) {
-            return "{}";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\n");
-        String nextIndent = indent + "  ";
-        boolean first = true;
-
-        for (String key : map.keySet()) {
-            if (!first) {
-                sb.append(",\n");
-            }
-            sb.append(nextIndent).append("\"").append(escapeString(key)).append("\": ");
-            sb.append(prettyPrintToString(nextIndent, map.get(key)));
-            first = false;
-        }
-
-        sb.append("\n").append(indent).append("}");
-        return sb.toString();
-    }
-
-    private static String prettyPrintArrayToString(String indent, List<Object> array) {
-        if (array.isEmpty()) {
-            return "[]";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("[\n");
-        String nextIndent = indent + "  ";
-        boolean first = true;
-
-        for (Object element : array) {
-            if (!first) {
-                sb.append(",\n");
-            }
-            sb.append(nextIndent);
-            sb.append(prettyPrintToString(nextIndent, element));
-            first = false;
-        }
-
-        sb.append("\n").append(indent).append("]");
-        return sb.toString();
-    }
-
-    private static String escapeString(String str) {
-        StringBuilder sb = new StringBuilder();
-        for (char c : str.toCharArray()) {
-            switch (c) {
-                case '"':
-                    sb.append("\\\"");
-                    break;
-                case '\\':
-                    sb.append("\\\\");
-                    break;
-                case '\b':
-                    sb.append("\\b");
-                    break;
-                case '\f':
-                    sb.append("\\f");
-                    break;
-                case '\n':
-                    sb.append("\\n");
-                    break;
-                case '\r':
-                    sb.append("\\r");
-                    break;
-                case '\t':
-                    sb.append("\\t");
-                    break;
-                default:
-                    if (c < 0x0020 || c > 0x007E) {
-                        // Escape non-ASCII and control characters as Unicode escape sequences
-                        sb.append(String.format("\\u%04x", (int) c));
-                    } else {
-                        sb.append(c);
-                    }
-            }
-        }
-        return sb.toString();
-    }
 
     /**
      * Helper method to create a LinkedHashMap with alternating keys and values
