@@ -3,6 +3,10 @@ package me.bechberger.util.json;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -10,18 +14,22 @@ import java.util.Map;
 
 public class JSONParser {
 
-    private final InputStream input;
+    private final Reader reader;
     private int current;
     private int line = 1;
     private int column = 0;
 
     public JSONParser(InputStream input) throws IOException {
-        this.input = input;
-        this.current = input.read();
+        this(new InputStreamReader(input, StandardCharsets.UTF_8));
+    }
+
+    public JSONParser(Reader reader) throws IOException {
+        this.reader = reader;
+        this.current = reader.read();
     }
 
     public JSONParser(String json) throws IOException {
-        this(new ByteArrayInputStream(json.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        this(new StringReader(json));
     }
 
     public static Object parse(String json) throws IOException {
@@ -58,7 +66,7 @@ public class JSONParser {
      * @throws IOException if an I/O error occurs
      */
     private int advance() throws IOException {
-        current = input.read();
+        current = reader.read();
         if (current == '\n') {
             line++;
             column = 0;
@@ -237,9 +245,9 @@ public class JSONParser {
                 throw new JSONParseException(line, column, "Unexpected end of input in string");
             }
             if (current == '\\') {
-                sb.append(parseEscape());
+                parseEscape(sb);
             } else {
-                sb.append(parseCharacter());
+                parseCharacter(sb);
             }
         }
 
@@ -253,12 +261,27 @@ public class JSONParser {
      *     '0020' . '10FFFF' - '"' - '\'
      *     '\' escape
      * </pre>
+     * Handles supplementary characters (e.g. emoji) that are represented
+     * as surrogate pairs by Reader.
      */
-    private char parseCharacter() throws IOException {
+    private void parseCharacter(StringBuilder sb) throws IOException {
         if (current >= 0x0020 && current != '"' && current != '\\') {
-            int ch = current;
+            char hi = (char) current;
             advance();
-            return (char) ch;
+            if (Character.isHighSurrogate(hi)) {
+                // Must be followed by a low surrogate
+                if (Character.isLowSurrogate((char) current)) {
+                    char lo = (char) current;
+                    advance();
+                    sb.append(hi);
+                    sb.append(lo);
+                } else {
+                    throw new JSONParseException(line, column,
+                            "Expected low surrogate after high surrogate");
+                }
+            } else {
+                sb.append(hi);
+            }
         } else {
             throw new JSONParseException(line, column, "Invalid character in string: " + (char) current);
         }
@@ -278,42 +301,75 @@ public class JSONParser {
      *     'u' hex hex hex hex
      * </pre>
      */
-    private char parseEscape() throws IOException {
+    private void parseEscape(StringBuilder sb) throws IOException {
         expect('\\');
         if (current == '"') {
             advance();
-            return '"';
+            sb.append('"');
         } else if (current == '\\') {
             advance();
-            return '\\';
+            sb.append('\\');
         } else if (current == '/') {
             advance();
-            return '/';
+            sb.append('/');
         } else if (current == 'b') {
             advance();
-            return '\b';
+            sb.append('\b');
         } else if (current == 'f') {
             advance();
-            return '\f';
+            sb.append('\f');
         } else if (current == 'n') {
             advance();
-            return '\n';
+            sb.append('\n');
         } else if (current == 'r') {
             advance();
-            return '\r';
+            sb.append('\r');
         } else if (current == 't') {
             advance();
-            return '\t';
+            sb.append('\t');
         } else if (current == 'u') {
             advance();
-            int codepoint = 0;
-            for (int i = 0; i < 4; i++) {
-                codepoint = codepoint * 16 + parseHex();
+            int codepoint = parseHexQuad();
+            // Handle surrogate pairs: \uD800-\uDBFF followed by \uDC00-\uDFFF
+            if (Character.isHighSurrogate((char) codepoint)) {
+                if (current == '\\') {
+                    advance();
+                    if (current == 'u') {
+                        advance();
+                        int low = parseHexQuad();
+                        if (Character.isLowSurrogate((char) low)) {
+                            sb.append(Character.toChars(
+                                    Character.toCodePoint((char) codepoint, (char) low)));
+                        } else {
+                            throw new JSONParseException(line, column,
+                                    "Expected low surrogate after \\uD83D, got \\u"
+                                            + String.format("%04X", low));
+                        }
+                    } else {
+                        throw new JSONParseException(line, column,
+                                "Expected \\uXXXX low surrogate after high surrogate");
+                    }
+                } else {
+                    throw new JSONParseException(line, column,
+                            "Expected \\uXXXX low surrogate after high surrogate");
+                }
+            } else {
+                sb.append(Character.toChars(codepoint));
             }
-            return (char) codepoint;
         } else {
             throw new JSONParseException(line, column, "Invalid escape sequence: \\" + (char) current);
         }
+    }
+
+    /**
+     * Parse four hex digits and return the resulting integer value.
+     */
+    private int parseHexQuad() throws IOException {
+        int codepoint = 0;
+        for (int i = 0; i < 4; i++) {
+            codepoint = codepoint * 16 + parseHex();
+        }
+        return codepoint;
     }
 
     /**

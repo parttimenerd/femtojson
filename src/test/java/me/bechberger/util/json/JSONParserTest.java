@@ -252,7 +252,48 @@ public class JSONParserTest {
                 Arguments.of("1.5e0", 1.5),
                 Arguments.of("1e1", 10.0),
                 Arguments.of("1e-1", 0.1),
-                Arguments.of("5e2", 500.0)
+                Arguments.of("5e2", 500.0),
+
+                // ── Unicode / emoji handling ──
+
+                // Raw multi-byte UTF-8 characters in strings
+                Arguments.of("\"café\"", "café"),
+                Arguments.of("\"naïve\"", "naïve"),
+                Arguments.of("\"über\"", "über"),
+
+                // 3-byte UTF-8 (CJK characters)
+                Arguments.of("\"日本語\"", "日本語"),
+                Arguments.of("\"你好世界\"", "你好世界"),
+
+                // 4-byte UTF-8 (emoji) — the original bug
+                Arguments.of("\"😀\"", "😀"),
+                Arguments.of("\"I'd like ☕️\"", "I'd like ☕️"),
+                Arguments.of("\"Hello 🌍!\"", "Hello 🌍!"),
+                Arguments.of("\"👨‍👩‍👧‍👦\"", "👨‍👩‍👧‍👦"),
+                Arguments.of("\"🎉🥳🎊\"", "🎉🥳🎊"),
+
+                // Surrogate pair escape sequences (emoji via JSON \\uHHHH\\uHHHH)
+                // Java source-level unicode escapes interfere, so we build the
+                // JSON input strings using char literals for the backslash.
+                Arguments.of(surrogateJson('D', '8', '3', 'D', 'D', 'E', '0', '0'), "\uD83D\uDE00"),  // U+1F600
+                Arguments.of(surrogateJson('D', '8', '3', 'C', 'D', 'F', '0', 'D'), "\uD83C\uDF0D"),  // U+1F30D
+                Arguments.of(surrogateJson('D', '8', '3', 'C', 'D', 'F', '8', '9'), "\uD83C\uDF89"),  // U+1F389
+
+                // Mixed raw UTF-8 and escaped Unicode
+                Arguments.of("\"abc\\u00e9def\"", "abcédef"),
+                Arguments.of("\"\\u0048\\u0065\\u006C\\u006C\\u006F\"", "Hello"),
+
+                // Unicode in object keys
+                Arguments.of(
+                        "{\"émoji\": \"😀\"}",
+                        createMap("émoji", "😀")
+                ),
+
+                // Unicode in arrays
+                Arguments.of(
+                        "[\"😀\", \"🌍\", \"🎉\"]",
+                        new ArrayList<>(Arrays.asList("😀", "🌍", "🎉"))
+                )
         );
     }
 
@@ -299,5 +340,21 @@ public class JSONParserTest {
             map.put((String) keysAndValues[i], keysAndValues[i + 1]);
         }
         return map;
+    }
+
+    /**
+     * Build a JSON string literal containing a surrogate-pair escape sequence.
+     * <p>
+     * We can't write {@code "\\uD83D"} in Java source because javac interprets
+     * {@code \uD83D} at the source-file level. Instead we build the string at
+     * runtime: {@code "\uD83D\uDE00"} → the 18-char JSON token.
+     *
+     * @param h1 h2 h3 h4 hex digits of the high surrogate
+     * @param l1 l2 l3 l4 hex digits of the low surrogate
+     */
+    private static String surrogateJson(char h1, char h2, char h3, char h4,
+                                        char l1, char l2, char l3, char l4) {
+        return "\"" + '\\' + 'u' + h1 + h2 + h3 + h4
+                    + '\\' + 'u' + l1 + l2 + l3 + l4 + "\"";
     }
 }

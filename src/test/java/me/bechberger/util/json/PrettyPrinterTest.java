@@ -185,6 +185,44 @@ public class PrettyPrinterTest {
                             "id": 2.0
                           }
                         ]"""
+                ),
+
+                // ── Unicode / emoji handling ──
+
+                // Emoji in string value (escaped as surrogate pair)
+                Arguments.of(
+                        "😀",
+                        "\"\\ud83d\\ude00\""
+                ),
+
+                // Multiple emoji
+                Arguments.of(
+                        "🎉🥳🎊",
+                        "\"\\ud83c\\udf89\\ud83e\\udd73\\ud83c\\udf8a\""
+                ),
+
+                // Non-ASCII Latin (BMP, single \\uXXXX)
+                Arguments.of(
+                        "café",
+                        "\"caf\\u00e9\""
+                ),
+
+                // CJK characters
+                Arguments.of(
+                        "日本語",
+                        "\"\\u65e5\\u672c\\u8a9e\""
+                ),
+
+                // Emoji in object key
+                Arguments.of(
+                        createMap("😀", "grin"),
+                        "{\n  \"\\ud83d\\ude00\": \"grin\"\n}"
+                ),
+
+                // Emoji in array
+                Arguments.of(
+                        new ArrayList<>(Arrays.asList("😀", "🌍")),
+                        "[\n  \"\\ud83d\\ude00\",\n  \"\\ud83c\\udf0d\"\n]"
                 )
         );
     }
