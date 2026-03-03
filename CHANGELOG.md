@@ -14,11 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+<<<<<<< HEAD
 ## [0.2.2] - 2026-03-02
 
 ### Fixed
 - Handling of surrogate pair escape sequences (emoji via JSON `\uHHHH\uHHHH`) in `JSONParser` (test coverage added, see `JSONParserTest`).
 
+=======
+>>>>>>> 0bfff6c (Add compact printer)
 ## [0.2.1] - 2026-02-25
 
 ### Added

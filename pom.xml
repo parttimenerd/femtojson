@@ -6,7 +6,7 @@
 
     <groupId>me.bechberger.util</groupId>
     <artifactId>femtojson</artifactId>
-    <version>0.2.2</version>
+    <version>0.2.1</version>
 
     <name>femtojson</name>
     <description>Tiny JSON parser for Java</description>

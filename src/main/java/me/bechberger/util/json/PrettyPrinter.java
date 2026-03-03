@@ -19,8 +19,8 @@ public class PrettyPrinter {
             return obj.toString();
         } else if (obj instanceof Double) {
             return obj.toString();
-        } else if (obj instanceof String s) {
-            return "\"" + JSONStringUtil.escapeString(s) + "\"";
+        } else if (obj instanceof String) {
+            return "\"" + JSONStringUtil.escapeString((String) obj) + "\"";
         } else if (obj instanceof Map) {
             return prettyPrintMap(indent, (Map<String, Object>) obj);
         } else if (obj instanceof ArrayList) {
@@ -75,5 +75,4 @@ public class PrettyPrinter {
         sb.append("\n").append(indent).append("]");
         return sb.toString();
     }
-
 }
