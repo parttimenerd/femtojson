@@ -10,6 +10,7 @@
 
     <name>femtojson</name>
     <description>Tiny JSON parser for Java</description>
+    <url>https://github.com/parttimenerd/femtojson</url>
 
     <scm>
         <connection>scm:git:git@github.com:parttimenerd/femtojson.git</connection>
