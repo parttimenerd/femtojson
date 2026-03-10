@@ -373,12 +373,57 @@ class VersionBumper:
             "Deploying to Maven Central"
         )
 
+    def git_check_clean(self):
+        """Ensure working tree is clean before making release changes.
+
+        This checks `git status --porcelain` and exits with an informative message
+        if uncommitted changes or untracked files are present. The user should
+        commit or stash local changes before running the release script.
+        """
+        result = subprocess.run(
+            ['git', 'status', '--porcelain'],
+            cwd=self.project_root,
+            capture_output=True,
+            text=True
+        )
+        if result.returncode != 0:
+            print("⚠ Could not check git status. Make sure git is available and you are in a git repository.")
+            sys.exit(1)
+
+        if result.stdout.strip():
+            print("\n❌ ERROR: Working tree is not clean. Please commit or stash your changes before releasing.")
+            print("The following files are uncommitted or untracked:")
+            print(result.stdout)
+            print("\nYou can run: git status --porcelain to inspect, then commit or stash your changes.")
+            sys.exit(1)
+
     def git_commit(self, version: str):
         """Commit version changes"""
+        # Stage modifications of tracked files (do not add untracked backup dir)
+        # This will stage updates to files we changed (e.g. PrettyPrinter.java, tests, pom.xml)
         self.run_command(
-            ['git', 'add', 'pom.xml', 'README.md', 'CHANGELOG.md'],
-            "Staging files"
+            ['git', 'add', '-u'],
+            "Staging tracked changes"
         )
+
+        # Ensure the backup dir is not staged accidentally (it should be untracked)
+        backup_rel = str(self.backup_dir.relative_to(self.project_root))
+        # git reset will silently ignore paths that are not staged
+        subprocess.run(['git', 'reset', '--', backup_rel], cwd=self.project_root)
+
+        # Check what is staged
+        result = subprocess.run(['git', 'diff', '--cached', '--name-only'], cwd=self.project_root, capture_output=True, text=True)
+        staged_files = [s for s in result.stdout.splitlines() if s.strip()]
+
+        if not staged_files:
+            print("\n❌ ERROR: Nothing staged for commit. Aborting.")
+            print("Git status:\n")
+            subprocess.run(['git', 'status', '--porcelain'], cwd=self.project_root)
+            self.restore_backups()
+            sys.exit(1)
+
+        print(f"Staged files: {staged_files}")
+
         self.run_command(
             ['git', 'commit', '-m', f'Bump version to {version}'],
             "Committing changes"
@@ -560,6 +605,9 @@ Note: CHANGELOG.md must have content under [Unreleased] section before releasing
         sys.exit(0)
 
     try:
+        # Ensure working tree is clean before making changes
+        bumper.git_check_clean()
+
         print("\n=== Creating backups ===")
         bumper.create_backups()
 

@@ -5,6 +5,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -187,7 +188,7 @@ public class CompactPrinterTest {
     @ParameterizedTest(name = "[{index}]")
     @MethodSource("compactPrintCases")
     public void testCompactPrint(Object obj, String expected) {
-        String actual = CompactPrinter.compactPrint(obj);
+        String actual = PrettyPrinter.compactPrint(obj);
         assertEquals(expected, actual, "Compact printed output should match expected format");
     }
 
@@ -197,7 +198,7 @@ public class CompactPrinterTest {
     @ParameterizedTest(name = "[{index}]")
     @MethodSource("compactPrintCases")
     public void testCompactPrintIsValidJSON(Object obj, String expected) throws IOException {
-        String compactPrinted = CompactPrinter.compactPrint(obj);
+        String compactPrinted = PrettyPrinter.compactPrint(obj);
 
         // Should not throw an exception when parsing
         JSONParser parser = new JSONParser(compactPrinted);
@@ -217,7 +218,7 @@ public class CompactPrinterTest {
             return;
         }
 
-        String compact = CompactPrinter.compactPrint(obj);
+        String compact = PrettyPrinter.compactPrint(obj);
         String pretty = PrettyPrinter.prettyPrint(obj);
 
         assertTrue(compact.length() <= pretty.length(),
