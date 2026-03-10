@@ -12,7 +12,7 @@ and uses Java objects (maps, lists, strings, ...) to represent JSON value.
 <dependency>
     <groupId>me.bechberger.util</groupId>
     <artifactId>femtojson</artifactId>
-    <version>0.2.2</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
@@ -97,11 +97,11 @@ Output:
 
 ### Compact Printing JSON
 
-Print JSON in compact format (single line, no extra whitespace) using the `CompactPrinter` class:
+Print JSON in compact format (single line, no extra whitespace) using the `PrettyPrinter` class:
 
 ```java
 import me.bechberger.util.json.JSONParser;
-import me.bechberger.util.json.CompactPrinter;
+import me.bechberger.util.json.PrettyPrinter;
 import java.io.IOException;
 
 public class CompactPrintExample {
@@ -111,7 +111,7 @@ public class CompactPrintExample {
         Object parsed = JSONParser.parse(json);
         
         // Compact print (single line)
-        String compact = CompactPrinter.compactPrint(parsed);
+        String compact = PrettyPrinter.compactPrint(parsed);
         System.out.println(compact);
     }
 }
