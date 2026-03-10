@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [0.3.0] - 2026-03-10
+
 ### Changed
 - Merge CompactPrinter into PrettyPrinter, as the compact printing functionality is now available via `PrettyPrinter.printCompact` method.
 
