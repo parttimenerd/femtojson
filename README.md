@@ -12,7 +12,7 @@ and uses Java objects (maps, lists, strings, ...) to represent JSON value.
 <dependency>
     <groupId>me.bechberger.util</groupId>
     <artifactId>femtojson</artifactId>
-    <version>0.4.0</version>
+    <version>0.4.1</version>
 </dependency>
 ```
 
