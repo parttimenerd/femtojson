@@ -7,21 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-### Changed
-### Deprecated
-### Removed
 ### Fixed
-### Security
+- List and unknown type handling in pretty printer
 
 ## [0.4.0] - 2026-03-10
-
-### Added
-### Changed
-### Deprecated
-### Removed
-### Fixed
-### Security
+- Just for technical reasons, the version was bumped to 0.4.0 instead of 0.3.2, as the latter was already used for a previous release.
 
 ## [0.3.0] - 2026-03-10
 

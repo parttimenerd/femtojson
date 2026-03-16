@@ -17,20 +17,18 @@ public class PrettyPrinter {
     private static String prettyPrint(String indent, Object obj, boolean compact) {
         if (obj == null) {
             return "null";
-        } else if (obj instanceof Boolean) {
+        } else if (obj instanceof Boolean || obj instanceof Integer ||
+                   obj instanceof Long || obj instanceof Float || obj instanceof Short || obj instanceof Byte ||
+                   obj instanceof Double) {
             return obj.toString();
-        } else if (obj instanceof Integer) {
-            return obj.toString();
-        } else if (obj instanceof Double) {
-            return obj.toString();
-        } else if (obj instanceof String) {
+        }  else if (obj instanceof String) {
             return "\"" + JSONStringUtil.escapeString((String) obj) + "\"";
         } else if (obj instanceof Map) {
             return prettyPrintMap(indent, (Map<String, Object>) obj, compact);
-        } else if (obj instanceof ArrayList) {
+        } else if (obj instanceof List) {
             return prettyPrintArray(indent, (List<Object>) obj, compact);
         } else {
-            return obj.toString();
+            throw new IllegalArgumentException("Unsupported type: " + obj.getClass().getName());
         }
     }
 
