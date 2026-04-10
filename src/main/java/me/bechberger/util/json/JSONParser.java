@@ -34,7 +34,13 @@ public class JSONParser {
 
     public static Object parse(String json) throws IOException {
         JSONParser parser = new JSONParser(json);
-        return parser.parseJson();
+        Object value = parser.parseJson();
+        parser.parseWs();
+        if (parser.current != -1) {
+            throw new JSONParseException(parser.line, parser.column,
+                    "Unexpected trailing content: '" + (char) parser.current + "'");
+        }
+        return value;
     }
 
     /**
@@ -353,6 +359,10 @@ public class JSONParser {
                     throw new JSONParseException(line, column,
                             "Expected \\uXXXX low surrogate after high surrogate");
                 }
+            } else if (Character.isLowSurrogate((char) codepoint)) {
+                throw new JSONParseException(line, column,
+                        "Lone low surrogate \\u" + String.format("%04X", codepoint)
+                                + " is not valid");
             } else {
                 sb.append(Character.toChars(codepoint));
             }
@@ -440,6 +450,9 @@ public class JSONParser {
         } else if (current == '0') {
             sb.append((char) current);
             advance();
+            if (current >= '0' && current <= '9') {
+                throw new JSONParseException(line, column, "Leading zeros are not allowed in JSON numbers");
+            }
         } else {
             throw new JSONParseException(line, column, "Expected digit but got '" + (char) current + "'");
         }
