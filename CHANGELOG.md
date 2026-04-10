@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [0.4.2] - 2026-04-10
+
 ### Fixed
 - Reject trailing content after a valid JSON value in `JSONParser.parse()` (e.g. `"123 456"`, `"{} {}"`)
 - Reject leading zeros in JSON numbers per RFC 8259 §6 (e.g. `01`, `007`, `-00`)
