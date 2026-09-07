@@ -1,0 +1,71 @@
+tag: ready
+maven_coordinates: me.bechberger.util:femtojson
+tagline: Tiny JSON parser and pretty-printer for Java. Zero dependencies, straightforward Map/List API
+  — no POJO binding, no annotations, just parse and go. For size-sensitive contexts (Java agents,
+  embedded tools) where pulling in Jackson or Gson is too heavy.
+tagline_short: Tiny zero-dependency JSON parser and pretty-printer — parse ad-hoc JSON without Jackson or Gson.
+when_to_use:
+- You need to parse or print JSON without pulling in a large dependency
+- You work with ad-hoc JSON structures (Map/List trees), not POJOs
+- JAR size or transitive dependency count matters
+when_not_to_use:
+- You need to bind JSON to Java objects (POJOs)
+- You need high-throughput JSON processing
+- You need streaming or token-level parsing
+vs:
+  name: Jackson
+  url: https://github.com/FasterXML/jackson
+  bottom_line: Pick femtojson for ad-hoc JSON without dependencies; pick Jackson for POJO binding, high
+    throughput, or production reliability.
+  comparison:
+  - feature: JAR size
+    self: ~13 KB
+    other: Large (core + modules)
+  - feature: Dependencies
+    self: None
+    other: Several
+  - feature: POJO databinding
+    self: ✗
+    other: ✓
+  - feature: Parse target
+    self: Map/List/primitives
+    other: POJOs, JsonNode, tokens
+  - feature: Streaming / token API
+    self: ✗
+    other: ✓
+  - feature: Pretty / compact print
+    self: ✓
+    other: ✓
+  - feature: Performance
+    self: Adequate
+    other: Very high
+  - feature: Maturity
+    self: Early
+    other: Extremely mature
+related:
+- label: femtoschema
+  url: https://github.com/parttimenerd/femtoschema
+install:
+- label: Maven
+  lang: xml
+  code: |
+    <dependency>
+      <groupId>me.bechberger.util</groupId>
+      <artifactId>femtojson</artifactId>
+      <version>VERSION</version>
+    </dependency>
+- label: Gradle
+  lang: groovy
+  code: implementation 'me.bechberger.util:femtojson:VERSION'
+usage:
+- label: Parse + print
+  lang: java
+  code: |
+    try {
+        Map<String, Object> obj = (Map<String, Object>)
+            JSONParser.parse("{\"name\":\"Alice\",\"age\":30}");
+        System.out.println(obj.get("name")); // Alice
+        String pretty  = PrettyPrinter.prettyPrint(obj);
+        String compact = PrettyPrinter.compactPrint(obj);
+    } catch (IOException e) { ... }
+note: All numbers are parsed as Double.
